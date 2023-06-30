@@ -1,0 +1,4 @@
+test*
+*pycache*
+*env/
+logs/

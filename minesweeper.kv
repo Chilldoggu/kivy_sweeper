@@ -1,0 +1,96 @@
+# DEBUGGUS RECTANGLUS
+# canvas.after:
+#     Color:
+#         rgba: 1, 0, 0, .5
+#     Rectangle:
+#         size: self.size
+#         pos: self.pos
+
+<MenuButton@MDRectangleFlatIconButton>:
+    size_hint: None, None
+    font_size: 30
+    padding: [20, 12, 20, 12]
+    line_width: 1.5
+
+<InnerGameplaySquareButton>:
+    background_normal: 'button_normal.png'
+    background_down: 'button_down.png'
+    border: [.5,.5,.5,.5]
+
+
+<GameplaySquareButton>:
+    name: 'button'
+    squareBtnObj: squareBtn
+    InnerGameplaySquareButton:
+        id: squareBtn
+
+
+<GameplaySquareImage>:
+    name: 'image'
+    Image:
+
+
+<GameplaySquare>:
+    btnWidgetObj: btnWidget
+    imgWidgetObj: imgWidget
+    GameplaySquareButton:
+        id: btnWidget
+    GameplaySquareImage:
+        id: imgWidget
+
+
+<Game>:
+    name: 'MainGame'
+    gameplayGridObj: gameplayGrid
+    BoxLayout:
+        id: mainBoxLayout
+        orientation:'horizontal'
+        padding: 20
+        spacing: 30
+        # TOOD: Spraw by dało się przesunąć GridLayout. Może Scatter?
+        GridLayout:
+            id: gameplayGrid
+            spacing: 0, 0
+            padding: [0, 0, 0, 0]
+            cols: 12
+            rows: 10
+            row_default_height: (root.height - mainBoxLayout.padding[0] * 2) / self.rows
+            col_default_width: self.row_default_height
+            col_force_default: True
+            row_force_default: True
+
+        Button:
+            size_hint: .2, 1
+            text: 'World'
+
+<Menu>:
+    name: 'MainMenu'
+    FloatLayout:
+        Image:
+            source: 'MineSweeperLogo.png'
+            y: root.height * 0.3
+
+        MenuButton:
+            id: playButton
+            text: 'Play Game!'
+            icon: 'mine'
+            center_x: root.center_x
+            on_center_x: 
+                self.center_x = root.center_x
+            y: root.height * 0.4
+            on_press: root.manager.current = 'MainGame'
+
+        MenuButton:
+            id: exitButton
+            text: 'Exit'
+            icon: 'exit-run'
+            center_x: root.center_x
+            on_center_x: 
+                self.center_x = root.center_x
+            y: root.height * 0.2 
+            on_press: exit()
+
+
+<MineSweeperScreenManager>:
+    Game:
+    Menu:
