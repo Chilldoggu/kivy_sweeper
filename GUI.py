@@ -113,7 +113,7 @@ class InnerGameplaySquareButton(Button):
             if touch.button == 'right':
                 ...
             elif touch.button == 'left':
-                ...
+                self.parent.on_left_click()
         return super(Button, self).on_touch_up(touch)
 
 
