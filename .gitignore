@@ -2,3 +2,6 @@ test*
 *pycache*
 *env/
 logs/
+tmp/
+.flake8
+animations.png
