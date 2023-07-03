@@ -214,8 +214,6 @@ class Game(Screen):
                             not flag_search:
                         squareObj.current = "image"
                         self.check_square(cords=[out_y, out_x])
-                        if squareObj.imgWidgetObj.children[0].source == "0.png":
-                            self.uncheck_outer_square(out_y, out_x)
                     if squareObj.current == "button" and flag_search and squareObj.get_screen('button').children[0].flag:
                         return True
         return False
