@@ -115,10 +115,10 @@
         # TOOD: Spraw by dało się przesunąć GridLayout. Może Scatter?
         Scatter:
             id: gridScatter
-            do_scroll_y: False
-            do_scroll_x: False
             size_hint: None, None
-            size: 300, 300
+            do_scale: False
+            do_rotation: False
+            size: gameplayGrid.size
             canvas.after:
                 Color:
                     rgba: 1, 0, 0, .5
@@ -127,10 +127,17 @@
                     pos: self.pos
             GridLayout:
                 id: gameplayGrid
+                size_hint: None, None
                 spacing: 0, 0
                 padding: [0, 0, 0, 0]
                 col_force_default: True
                 row_force_default: True
+                canvas.after:
+                    Color:
+                        rgba: 0, 1, 0, .5
+                    Rectangle:
+                        size: self.size
+                        pos: self.pos
 
         BoxLayout:
             orientation: 'vertical'
@@ -165,7 +172,7 @@
                 CharLabel
             Button:
                 text: 'DEBUGGIN TIME'
-                on_press: print(gameplayGrid.size, gameplayGrid.row_default_height, gameplayGrid.col_default_width)
+                on_press: print(gameplayGrid.size)
 
 <Menu>:
     name: 'MainMenu'

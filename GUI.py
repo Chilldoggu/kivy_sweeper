@@ -115,6 +115,17 @@ class GameplaySquareButton(Screen):
 class InnerGameplaySquareButton(Button):
     flag = False
 
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            print(f"TOUCH DOWN: {touch}")
+            touch.grab(self)
+        return super(Button, self).on_touch_down(touch)
+
+    def on_touch_move(self, touch):
+        if touch.grab_current is self:
+            print(f"TOUCH MOVE: {touch}")
+        return super(Button, self).on_touch_move(touch)
+
     # NANI DA FACK THE INDENTATION DOIN???????
     def on_touch_up(self, touch):
         if self.collide_point(*touch.pos) and touch.grab_current is self:
@@ -211,6 +222,10 @@ class Game(Screen):
         else:
             self.gameplayGridObj.row_default_height = (Window.size[1] - self.mainBoxLayoutObj.padding[0] * 2) / board_size[1]
             self.gameplayGridObj.col_default_width = self.gameplayGridObj.row_default_height
+        # New gridLayout size
+        grid_size_horizontal = board_size[0] * self.gameplayGridObj.col_default_width
+        grid_size_vertical = board_size[1] * self.gameplayGridObj.row_default_height
+        self.gameplayGridObj.size = (grid_size_horizontal, grid_size_vertical)
 
         # Set up the GUI grid with buttons and proper images (1, 2, mine, etc...)
         for i in range(self.gameplayGridObj.rows):
