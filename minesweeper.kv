@@ -6,6 +6,8 @@
 #         size: self.size
 #         pos: self.pos
 
+#:import Factory kivy.factory.Factory
+
 <MenuButton@MDRectangleFlatIconButton>:
     size_hint: None, None
     font_size: 30
@@ -38,30 +40,132 @@
     GameplaySquareImage:
         id: imgWidget
 
+<WinPopup@Popup>
+    auto_dismiss: False
+    title_align: 'center'
+    title: 'WIN SCREEN'
+    size_hint: .25, .25
+    overlay_color: 0, 0, 0, 0
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20, 0, 20, 0
+        spacing: 20
+        Label:
+            text: 'Winner'
+        Button:
+            size_hint: .7, .3
+            text: 'Exit'
+            pos_hint: {'center_x': .5}
+            on_press: root.dismiss()
+
+<LosePopup@Popup>
+    auto_dismiss: False
+    title_align: 'center'
+    title: 'LOSE SCREEN'
+    size_hint: .25, .25
+    overlay_color: 0, 0, 0, 0
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 20, 0, 20, 0
+        spacing: 20
+        Label:
+            text: 'Loser'
+            # canvas.after:
+            #     Color:
+            #         rgba: 1, 0, 0, .5
+            #     Rectangle:
+            #         size: self.size
+            #         pos: self.pos
+        Button:
+            size_hint: .7, .3
+            text: 'Exit'
+            pos_hint: {'center_x': .5}
+            on_press: root.dismiss()
+            # canvas.after:
+            #     Color:
+            #         rgba: 0, 1, 0, .5
+            #     Rectangle:
+            #         size: self.size
+            #         pos: self.pos
+
+<CharLabel@Label>
+    color: 0, 0, 0, 1
+    font_size: 50
+    text: '0'
+    canvas.before:
+        Color:
+            rgba: .3, .3, .3, 1
+        Line:
+            width: 2
+            rectangle: self.x, self.y, self.width, self.height
 
 <Game>:
     name: 'MainGame'
     gameplayGridObj: gameplayGrid
+    mineCountdownObj: mineCountdown
+    timeCountdownObj: timeCountdown
+    mainBoxLayoutObj: mainBoxLayout
+    on_total_flags: self.set_mine_countdown(self.mineSweeperObj.mine_amount - self.total_flags)
+
     BoxLayout:
         id: mainBoxLayout
         orientation:'horizontal'
         padding: 20
         spacing: 30
         # TOOD: Spraw by dało się przesunąć GridLayout. Może Scatter?
-        GridLayout:
-            id: gameplayGrid
-            spacing: 0, 0
-            padding: [0, 0, 0, 0]
-            cols: 12
-            rows: 10
-            row_default_height: (root.height - mainBoxLayout.padding[0] * 2) / self.rows
-            col_default_width: self.row_default_height
-            col_force_default: True
-            row_force_default: True
+        Scatter:
+            id: gridScatter
+            do_scroll_y: False
+            do_scroll_x: False
+            size_hint: None, None
+            size: 300, 300
+            canvas.after:
+                Color:
+                    rgba: 1, 0, 0, .5
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            GridLayout:
+                id: gameplayGrid
+                spacing: 0, 0
+                padding: [0, 0, 0, 0]
+                col_force_default: True
+                row_force_default: True
 
-        Button:
-            size_hint: .2, 1
-            text: 'World'
+        BoxLayout:
+            orientation: 'vertical'
+            pos_hint: {'right': 1}
+            size_hint: .5, 1
+            spacing: 20
+            BoxLayout:
+                id: mineCountdown
+                size_hint: 1, .2
+                # size_hint: None, None
+                # size: 300, 100 
+                orientation: 'horizontal'
+                Label:
+                    size_hint: 1.2, 1
+                    color: 0, 0, 0, 1
+                    text: 'Mines left:'
+                CharLabel
+                CharLabel
+                CharLabel
+            BoxLayout:
+                id: timeCountdown
+                size_hint: 1, .2
+                # size_hint: None, None
+                # size: 300, 100 
+                orientation: 'horizontal'
+                Label:
+                    size_hint: 1.2, 1
+                    color: 0, 0, 0, 1
+                    text: 'Time:'
+                CharLabel
+                CharLabel
+                CharLabel
+            Button:
+                text: 'DEBUGGIN TIME'
+                on_press: print(gameplayGrid.size, gameplayGrid.row_default_height, gameplayGrid.col_default_width)
 
 <Menu>:
     name: 'MainMenu'
@@ -92,5 +196,5 @@
 
 
 <MineSweeperScreenManager>:
-    Menu:
     Game:
+    Menu:
