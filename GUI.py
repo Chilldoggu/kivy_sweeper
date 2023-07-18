@@ -11,6 +11,7 @@ from kivy.clock import Clock
 from kivymd.app import MDApp
 from kivy.factory import Factory
 from kivy.core.window import Window
+from kivy.animation import Animation
 
 import random
 # import time
@@ -99,10 +100,35 @@ class GameplaySquare(ScreenManager):
     btnWidgetObj = ObjectProperty(None)
     imgWidgetObj = ObjectProperty(None)
     gameObj = ObjectProperty(None)
+    gameplayGridObj = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(GameplaySquare, self).__init__(**kwargs)
         self.transition = FadeTransition()
+        Clock.schedule_once(lambda dt: self.makeGridRef())
+
+    def makeGridRef(self):
+        # Get the scatter widget to implement moving Buttons
+        if not self.gameplayGridObj is None:
+            return
+        p = self.parent
+        while not p.__class__.__name__ == "GridLayout":
+            if p.__class__.__name__ == "WindowSDL":
+                raise Exception("There's no GridLayout Widget")
+            p = p.parent
+        self.gameplayGridObj = p
+
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            touch.grab(self)
+        return super().on_touch_down(touch)
+
+    def on_touch_move(self, touch):
+        # Move the grid with the cursor
+        if touch.grab_current is self and touch.button == 'middle':
+            self.gameplayGridObj.x += (touch.x - touch.px)
+            self.gameplayGridObj.y += (touch.y - touch.py)
+        return super().on_touch_move(touch)
 
     def set_img_source(self, src: str):
         self.imgWidgetObj.children[0].source = src
@@ -115,16 +141,8 @@ class GameplaySquareButton(Screen):
 class InnerGameplaySquareButton(Button):
     flag = False
 
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            print(f"TOUCH DOWN: {touch}")
-            touch.grab(self)
-        return super(Button, self).on_touch_down(touch)
-
-    def on_touch_move(self, touch):
-        if touch.grab_current is self:
-            print(f"TOUCH MOVE: {touch}")
-        return super(Button, self).on_touch_move(touch)
+    def __init__(self, **kwargs):
+        super(InnerGameplaySquareButton, self).__init__(**kwargs)
 
     # NANI DA FACK THE INDENTATION DOIN???????
     def on_touch_up(self, touch):
@@ -167,6 +185,7 @@ class GameplaySquareImage(Screen):
 
 class Game(Screen):
     mainBoxLayoutObj = ObjectProperty(None)
+    gridScrollViewObj = ObjectProperty(None)
     gameplayGridObj = ObjectProperty(None)
     gameplaySquareObj = ObjectProperty(None)
     mineCountdownObj = ObjectProperty(None)
@@ -181,7 +200,7 @@ class Game(Screen):
         super(Game, self).__init__(**kw)
         self.total_flags = 0
         self.time = 0
-        self.mineSweeperObj = Minesweeper(board_size=(12, 10))
+        self.mineSweeperObj = Minesweeper(board_size=(15, 15))
         Clock.schedule_once(lambda dt: self.make_grid())
         Clock.schedule_once(lambda dt: self.set_mine_countdown(self.mineSweeperObj.mine_amount - self.total_flags))
         self.timeCountdownEvent = Clock.schedule_interval(lambda dt: self.update_time_countdown(), 1)
@@ -213,15 +232,18 @@ class Game(Screen):
         board_size = self.mineSweeperObj.board_size
         self.gameplayGridObj.rows = board_size[1]
         self.gameplayGridObj.cols = board_size[0]
+        self.gridScrollViewObj.size = (816, 680)
         if board_size[0] >= 12 or board_size[1] >= 10:
             self.gameplayGridObj.row_default_height = 68.0
             self.gameplayGridObj.col_default_width = 68.0
         elif board_size[0] > board_size[1]:
-            self.gameplayGridObj.col_default_width = (Window.size[0] * .6) / board_size[0]
+            self.gameplayGridObj.col_default_width = self.gridScrollViewObj.width / board_size[0]
             self.gameplayGridObj.row_default_height = self.gameplayGridObj.col_default_width
+            self.gridScrollViewObj.height = self.gameplayGridObj.row_default_height * board_size[1]
         else:
-            self.gameplayGridObj.row_default_height = (Window.size[1] - self.mainBoxLayoutObj.padding[0] * 2) / board_size[1]
+            self.gameplayGridObj.row_default_height = self.gridScrollViewObj.height / board_size[1]
             self.gameplayGridObj.col_default_width = self.gameplayGridObj.row_default_height
+            self.gridScrollViewObj.width = self.gameplayGridObj.col_default_width * board_size[0]
         # New gridLayout size
         grid_size_horizontal = board_size[0] * self.gameplayGridObj.col_default_width
         grid_size_vertical = board_size[1] * self.gameplayGridObj.row_default_height
@@ -302,6 +324,28 @@ class Game(Screen):
         popup = Factory.WinPopup()
         popup.bind(on_dismiss=self.__init__)
         popup.open()
+
+    # TOOD: Animations if exceeding boundaries of scroll view
+    def check_grid_boundaries(self):
+        if self.gameplayGridObj.size[0] < self.gridScrollViewObj.size[0] or \
+           self.gameplayGridObj.size[1] < self.gridScrollViewObj.size[1]:
+            return  
+
+        animation = Animation()
+        print(self.gameplayGridObj.pos, self.gameplayGridObj.size)
+        if self.gameplayGridObj.top < self.gridScrollViewObj.height:             
+            print('top')
+            animation &= Animation(top=self.gridScrollViewObj.height, t='out_bounce', duration=1)
+        if self.gameplayGridObj.right < self.gridScrollViewObj.width:
+            print('right')
+            animation &= Animation(right=self.gridScrollViewObj.right, t='out_bounce', duration=1)
+        if self.gameplayGridObj.y > 0:
+            print('bottom')
+            animation &= Animation(y=0, t='out_bounce', duration=1)
+        if self.gameplayGridObj.x > 0:
+            print('left')
+            animation &= Animation(x=0, t='out_bounce', duration=1)
+        animation.start(self.gameplayGridObj)
 
 
 class Menu(Screen):

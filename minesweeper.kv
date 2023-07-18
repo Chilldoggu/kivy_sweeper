@@ -70,23 +70,11 @@
         spacing: 20
         Label:
             text: 'Loser'
-            # canvas.after:
-            #     Color:
-            #         rgba: 1, 0, 0, .5
-            #     Rectangle:
-            #         size: self.size
-            #         pos: self.pos
         Button:
             size_hint: .7, .3
             text: 'Exit'
             pos_hint: {'center_x': .5}
             on_press: root.dismiss()
-            # canvas.after:
-            #     Color:
-            #         rgba: 0, 1, 0, .5
-            #     Rectangle:
-            #         size: self.size
-            #         pos: self.pos
 
 <CharLabel@Label>
     color: 0, 0, 0, 1
@@ -101,6 +89,7 @@
 
 <Game>:
     name: 'MainGame'
+    gridScrollViewObj: gridScrollView
     gameplayGridObj: gameplayGrid
     mineCountdownObj: mineCountdown
     timeCountdownObj: timeCountdown
@@ -112,19 +101,19 @@
         orientation:'horizontal'
         padding: 20
         spacing: 30
-        # TOOD: Spraw by dało się przesunąć GridLayout. Może Scatter?
-        Scatter:
-            id: gridScatter
+
+        ScrollView:
+            id: gridScrollView
+            do_scroll_x: False
+            do_scroll_y: False
             size_hint: None, None
-            do_scale: False
-            do_rotation: False
-            size: gameplayGrid.size
+            size: 816, 680
             canvas.after:
                 Color:
-                    rgba: 1, 0, 0, .5
-                Rectangle:
-                    size: self.size
-                    pos: self.pos
+                    rgba: .3, .3, .3, 1
+                Line:
+                    width: 2
+                    rectangle: self.x, self.y, self.width, self.height
             GridLayout:
                 id: gameplayGrid
                 size_hint: None, None
@@ -132,12 +121,7 @@
                 padding: [0, 0, 0, 0]
                 col_force_default: True
                 row_force_default: True
-                canvas.after:
-                    Color:
-                        rgba: 0, 1, 0, .5
-                    Rectangle:
-                        size: self.size
-                        pos: self.pos
+                on_touch_up: root.check_grid_boundaries()
 
         BoxLayout:
             orientation: 'vertical'
@@ -171,8 +155,8 @@
                 CharLabel
                 CharLabel
             Button:
-                text: 'DEBUGGIN TIME'
-                on_press: print(gameplayGrid.size)
+                text: 'DEBUG'
+                on_press: print()
 
 <Menu>:
     name: 'MainMenu'
